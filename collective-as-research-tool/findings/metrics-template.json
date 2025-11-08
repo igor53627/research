@@ -1,0 +1,24 @@
+{
+  "experiment_name": "",
+  "date": "",
+  "method": "traditional|collective",
+  "time_to_complete_hours": 0,
+  "code_quality": {
+    "test_coverage_percent": 0,
+    "documentation_completeness": 0,
+    "lines_of_code": 0,
+    "complexity_score": 0
+  },
+  "accuracy": {
+    "documentation_errors": 0,
+    "hallucinations": 0,
+    "verified_claims_percent": 0
+  },
+  "reproducibility": {
+    "setup_steps": 0,
+    "dependencies_count": 0,
+    "reproduction_success": false
+  },
+  "findings": [],
+  "notes": ""
+}
