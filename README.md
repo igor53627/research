@@ -1,197 +1,30 @@
-# Research Repository
+# Research
 
-**AI-Assisted Technical Research and Experimentation**
+Independent research projects carried out by LLM tools - primarily Claude Code. Each directory in this repo represents a separate investigation where **every single line of text and code was written by an LLM**.
 
-This repository serves as a collection of independent research projects, explorations, and technical investigations conducted with the assistance of AI tools (primarily Claude Code). Each project represents a focused inquiry into a specific technical question, tool, or methodology.
+## About this repository
 
-## Philosophy
+This collection demonstrates AI-assisted technical research across diverse domains. Each project includes complete implementations, analysis, benchmarks, and findings - all generated through iterative collaboration with Claude Code.
 
-This repository embraces **AI-assisted research** as a legitimate and powerful approach to technical exploration. The methodology combines:
+The goal is to explore how LLMs can conduct rigorous technical research: proposing hypotheses, implementing experiments, collecting metrics, and drawing evidence-based conclusions.
 
-- **Human curiosity and direction** - defining questions worth investigating
-- **AI capabilities** - rapid prototyping, analysis, and documentation
-- **Transparency** - all code, findings, and reasoning documented
-- **Reproducibility** - complete implementations with setup instructions
+## Methodology
 
-Every piece of code and documentation in this repository is crafted through collaborative work with AI, demonstrating what's possible when human insight guides machine capability.
+Projects follow a structured research workflow:
 
-## Repository Structure
+1. **Define research question** - Human provides direction and scope
+2. **LLM explores and implements** - Claude Code researches, codes, tests
+3. **Collect data and metrics** - Benchmarks, comparisons, measurements
+4. **Document findings** - Complete writeups with reproducible results
+5. **Commit with transparency** - Links to prompts and transcripts when available
 
-Each research project lives in its own directory:
-
-```
-research/
-├── README.md (this file)
-├── project-name-1/
-│   ├── README.md          # Project overview and findings
-│   ├── _summary.md        # Auto-generated summary
-│   ├── setup.sh           # Setup/installation script
-│   ├── src/               # Implementation code
-│   ├── tests/             # Tests and benchmarks
-│   └── findings.md        # Detailed analysis
-├── project-name-2/
-│   └── ...
-└── .github/
-    └── workflows/
-        └── update-readme.yml
-```
-
-## How to Conduct Research
-
-### 1. **Define Your Question**
-
-Start with a clear, focused research question:
-- "How does X compare to Y in terms of performance?"
-- "Can we implement Z using approach A?"
-- "What are the trade-offs between method 1 and method 2?"
-
-### 2. **Create Project Directory**
-
-```bash
-mkdir -p [descriptive-project-name]
-cd [descriptive-project-name]
-```
-
-### 3. **Explore and Document**
-
-Use Claude Code to:
-- Research existing approaches
-- Implement prototypes
-- Run experiments and benchmarks
-- Collect data and metrics
-- Document findings in real-time
-
-### 4. **Structure Your Findings**
-
-Each project should include:
-
-**README.md** - Overview and key findings
-```markdown
-# [Project Name]
-
-## Research Question
-[What you set out to investigate]
-
-## Approach
-[How you investigated it]
-
-## Key Findings
-- Finding 1
-- Finding 2
-- Finding 3
-
-## Conclusions
-[What you learned]
-
-## Setup
-[How to reproduce]
-```
-
-**Code** - Working implementations
-- Source code in `src/`
-- Tests in `tests/`
-- Scripts for setup/benchmarks
-
-**Documentation** - Detailed analysis
-- Performance metrics
-- Comparison tables
-- Insights and observations
-- Links to relevant resources
-
-### 5. **Commit and Share**
-
-```bash
-git add .
-git commit -m "Research: [topic] - [key finding or milestone]"
-git push
-```
-
-Include prompts or transcript links in commits when relevant to show the research process.
-
-## Research Workflow with Claude Code
-
-### Typical Session Flow
-
-```bash
-# Start in project directory
-cd research/[project-name]
-
-# Launch Claude Code
-claude
-
-# Example prompts for research:
-# "Let's explore how [technology X] handles [scenario Y]"
-# "Can you implement a benchmark comparing [A] vs [B]?"
-# "Help me analyze the performance characteristics of [Z]"
-# "Document what we learned about [topic] with code examples"
-```
-
-### Using Task Master for Complex Research
-
-For multi-phase research projects:
-
-```bash
-# Create research plan
-task-master parse-prd research-plan.md
-
-# Work through research phases
-task-master next
-task-master show <id>
-
-# Track findings as you go
-task-master update-subtask --id=<id> --prompt="Found that X performs 2x better than Y when..."
-```
-
-## Example Research Topics
-
-**Performance & Optimization:**
-- Database query optimization techniques
-- Algorithm comparison and benchmarking
-- Memory usage patterns in different approaches
-
-**Technology Exploration:**
-- Evaluating new libraries or frameworks
-- Comparing implementation strategies
-- Testing edge cases and limitations
-
-**Proof of Concept:**
-- Novel algorithm implementations
-- Integration experiments
-- Tooling and automation improvements
-
-**Analysis & Measurement:**
-- Performance profiling
-- Code quality metrics
-- Security vulnerability research
-
-## Research Quality Guidelines
-
-### Good Research Projects Include:
-
-✅ **Clear Question** - Specific, answerable inquiry
-✅ **Reproducible Setup** - Installation and run instructions
-✅ **Working Code** - Actual implementations, not just theory
-✅ **Measurements** - Benchmarks, tests, metrics
-✅ **Documentation** - Findings, insights, conclusions
-✅ **Transparency** - Show your work and reasoning
-
-### Avoid:
-
-❌ Vague or overly broad questions
-❌ Missing setup instructions
-❌ Undocumented results
-❌ Untested assumptions
-❌ Cherry-picked data
-
-## Automation
-
-This repository uses GitHub Actions to automatically:
-- Discover new research projects
-- Generate project summaries
-- Update the main README with project listings
-- Maintain fresh documentation
-
-See `.github/workflows/update-readme.yml` for implementation details.
+Each project includes:
+- Research question and hypothesis
+- Working code implementations
+- Test suites and benchmarks
+- Metrics and analysis
+- Clear conclusions
+- Setup scripts for reproducibility
 
 ## Projects
 
@@ -222,7 +55,12 @@ def read_summary(project_dir):
     """Read _summary.md if it exists"""
     summary_file = project_dir / '_summary.md'
     if summary_file.exists():
-        return summary_file.read_text().strip()
+        content = summary_file.read_text().strip()
+        # Remove the "# Summary: [title]" heading if present
+        lines = content.split('\n')
+        if lines and lines[0].startswith('# Summary:'):
+            return '\n'.join(lines[2:]).strip()  # Skip heading and blank line
+        return content
     return None
 
 def read_readme_first_section(project_dir):
@@ -258,6 +96,23 @@ def read_readme_first_section(project_dir):
 
     return title, research_question, status
 
+# Get GitHub repo URL
+try:
+    result = subprocess.run(
+        ['git', 'remote', 'get-url', 'origin'],
+        capture_output=True,
+        text=True,
+        check=True
+    )
+    github_url = result.stdout.strip()
+    # Convert SSH to HTTPS if needed
+    if github_url.startswith('git@github.com:'):
+        github_url = github_url.replace('git@github.com:', 'https://github.com/')
+    if github_url.endswith('.git'):
+        github_url = github_url[:-4]
+except:
+    github_url = "https://github.com/igor53627/research"
+
 # Get all project directories (excluding hidden dirs and .github)
 research_dir = Path('.')
 projects = []
@@ -265,8 +120,7 @@ projects = []
 for d in research_dir.iterdir():
     if (d.is_dir() and
         not d.name.startswith('.') and
-        d.name != '.github' and
-        d.name != 'collective-as-research-tool'):  # Will add manually below
+        d.name not in ['.github']):
 
         creation_date = get_creation_date(d)
         projects.append((d, creation_date))
@@ -274,31 +128,7 @@ for d in research_dir.iterdir():
 # Sort by date (newest first)
 projects.sort(key=lambda x: x[1], reverse=True)
 
-# Add our main project first manually
-print("### 1. [Claude Code Sub-Agent Collective as Research Methodology](./collective-as-research-tool/)")
-print()
-print("**Research Question**: Can the claude-code-sub-agent-collective framework be used as a structured methodology for conducting technical research?")
-print()
-print("**Started**: 2025-11-08")
-print("**Status**: Active Investigation")
-print()
-summary_path = Path('collective-as-research-tool/_summary.md')
-if summary_path.exists():
-    print(summary_path.read_text().strip())
-else:
-    print("**Summary**: Evaluating whether the collective's hub-and-spoke coordination, TDD enforcement, and Context7 integration provide measurably better research outcomes compared to traditional single-agent AI assistance. This meta-research project uses the collective to study the collective's effectiveness!")
-    print()
-    print("**Key Areas**:")
-    print("- Comparative benchmarking (traditional vs collective methodology)")
-    print("- Research workflow optimization")
-    print("- TDD applicability to research code")
-    print("- Reproducibility and quality metrics")
-print()
-print("[View Full Project →](./collective-as-research-tool/README.md)")
-print()
-
-# Generate listings for other projects
-project_num = 2
+# Generate listings for projects
 for project_dir, creation_date in projects:
     title, research_question, status = read_readme_first_section(project_dir)
     summary = read_summary(project_dir)
@@ -306,41 +136,25 @@ for project_dir, creation_date in projects:
     if not title:
         title = project_dir.name.replace('-', ' ').title()
 
-    print(f"### {project_num}. [{title}](./{project_dir.name}/)")
-    print()
-
-    if research_question:
-        print(f"**Research Question**: {research_question}")
-        print()
-
-    print(f"**Started**: {creation_date}")
-    print(f"**Status**: {status}")
+    print(f"### [{title}]({github_url}/tree/main/{project_dir.name}) ({creation_date})")
     print()
 
     if summary:
         print(summary)
     else:
-        print(f"Research project exploring {title.lower()}.")
+        if research_question:
+            print(f"Investigating: {research_question}")
+        else:
+            print(f"Technical research exploring {title.lower()}.")
 
     print()
-    print(f"[View Full Project →](./{project_dir.name}/README.md)")
+
+if not projects:
+    print("*Projects will appear here as they are added to the repository.*")
     print()
-
-    project_num += 1
-
-if project_num == 2:
-    # Only our main project exists
-    pass
 
 ]]]-->
-### 1. [Claude Code Sub-Agent Collective as Research Methodology](./collective-as-research-tool/)
-
-**Research Question**: Can the claude-code-sub-agent-collective framework be used as a structured methodology for conducting technical research?
-
-**Started**: 2025-11-08
-**Status**: Active Investigation
-
-# Summary: Collective as Research Tool
+### [Claude Code Sub-Agent Collective as a Research Methodology](https://github.com/igor53627/research/tree/main/collective-as-research-tool) (2025-11-08)
 
 **Research Focus**: Evaluating the claude-code-sub-agent-collective framework as a structured methodology for technical research, comparing it to traditional single-agent AI assistance.
 
@@ -352,23 +166,41 @@ if project_num == 2:
 
 **Interesting Aspect**: Meta-research project - using the collective to study the collective's effectiveness for research!
 
-[View Full Project →](./collective-as-research-tool/README.md)
-
 <!--[[[end]]]-->
 
-## Contributing
+## Creating new research projects
 
-This is a personal research repository, but the methodology and structure can be adapted for your own use. Feel free to:
-- Fork and adapt the structure
-- Use the templates for your own research
-- Share findings and improvements
+Each project should be self-contained in its own directory with:
 
-## License
+- `README.md` - Research question, methodology, findings
+- `_summary.md` - Brief summary for auto-generated listings (optional)
+- `setup.sh` - Reproducible setup script
+- `src/` - Implementation code
+- `tests/` - Test suites and benchmarks
+- `findings/` - Metrics, data, analysis
 
-Research findings and code are shared for educational purposes. Refer to individual project directories for specific licensing information.
+The main README automatically updates via GitHub Actions using [Cog](https://nedbatchelder.com/code/cog/). Project summaries are either read from `_summary.md` or extracted from the project README.
+
+## Tools and frameworks
+
+Projects in this repository leverage:
+
+- **Claude Code** - Primary LLM for research and implementation
+- **Task Master AI** - Project planning and task orchestration
+- **Claude Code Sub-Agent Collective** - Multi-agent coordination framework
+- **Context7** - Real-time library documentation lookup
+- Various testing, benchmarking, and analysis tools per project
+
+## Philosophy
+
+This repository embraces LLM-generated research as a legitimate methodology for technical exploration. By documenting everything - code, findings, metrics, reasoning - it demonstrates what AI-assisted research looks like when done rigorously.
+
+Key principles:
+- **Transparency** - Show the process, not just results
+- **Reproducibility** - Complete setup instructions and scripts
+- **Rigor** - Real benchmarks, tests, and measurements
+- **Honesty** - Document limitations and failures, not just successes
 
 ---
 
-**Research Philosophy**: *"The best way to understand something is to build it, measure it, and explain it clearly."*
-
-*Powered by Claude Code and human curiosity.*
+*Automated technical research, conducted by AI, documented for humans.*
