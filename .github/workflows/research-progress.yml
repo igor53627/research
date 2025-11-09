@@ -1,0 +1,121 @@
+name: Research Progress Tracker
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/findings/**'
+      - '**/README.md'
+      - '**/_summary.md'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  update-progress:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for analysis
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Analyze research progress
+        id: analyze
+        run: |
+          # Count research projects
+          PROJECT_COUNT=$(find . -maxdepth 1 -type d -name "*-*" ! -name ".*" | wc -l | tr -d ' ')
+          echo "project_count=$PROJECT_COUNT" >> $GITHUB_OUTPUT
+
+          # Count findings files
+          FINDINGS_COUNT=$(find . -type f -path "*/findings/*" -name "*.md" | wc -l | tr -d ' ')
+          echo "findings_count=$FINDINGS_COUNT" >> $GITHUB_OUTPUT
+
+          # Get last commit message
+          LAST_COMMIT=$(git log -1 --pretty=format:"%s")
+          echo "last_commit=$LAST_COMMIT" >> $GITHUB_OUTPUT
+
+          echo "📊 Research Progress:"
+          echo "  Projects: $PROJECT_COUNT"
+          echo "  Findings: $FINDINGS_COUNT"
+
+      - name: Create progress summary
+        run: |
+          cat << 'EOF' > research-progress.md
+          # Research Progress Summary
+
+          **Generated**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Projects**: ${{ steps.analyze.outputs.project_count }}
+          **Findings Documents**: ${{ steps.analyze.outputs.findings_count }}
+          **Last Update**: ${{ steps.analyze.outputs.last_commit }}
+
+          ## Active Research Projects
+
+          EOF
+
+          # List all project directories with README files
+          find . -maxdepth 1 -type d -name "*-*" ! -name ".*" | while read dir; do
+            if [ -f "$dir/README.md" ]; then
+              PROJECT_NAME=$(basename "$dir")
+              echo "- [$PROJECT_NAME](./$PROJECT_NAME/)" >> research-progress.md
+
+              # Extract research question if available
+              if grep -q "Research Question" "$dir/README.md"; then
+                QUESTION=$(grep -A 1 "Research Question" "$dir/README.md" | tail -1 | sed 's/^[*-] //')
+                echo "  - $QUESTION" >> research-progress.md
+              fi
+            fi
+          done
+
+          cat research-progress.md
+
+      - name: Update project READMEs with status badges
+        run: |
+          # Add status badges to project READMEs (optional enhancement)
+          echo "Status badge updates would go here"
+
+      - name: Commit progress summary
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [ -f research-progress.md ]; then
+            git add research-progress.md
+            git diff --quiet --cached || git commit -m "Auto-update research progress summary"
+          fi
+
+      - name: Create research metrics
+        run: |
+          # Calculate research metrics
+          cat << 'EOF' > research-metrics.json
+          {
+            "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "projects": {
+              "total": ${{ steps.analyze.outputs.project_count }},
+              "active": 0,
+              "completed": 0
+            },
+            "findings": {
+              "documents": ${{ steps.analyze.outputs.findings_count }}
+            },
+            "commits": {
+              "total": $(git rev-list --count HEAD),
+              "last": "${{ steps.analyze.outputs.last_commit }}"
+            }
+          }
+          EOF
+
+          cat research-metrics.json
+
+      - name: Comment on relevant PRs (if any)
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'Research:')
+        run: |
+          echo "Would post progress update to PR if this was a PR"
+
+permissions:
+  contents: write
